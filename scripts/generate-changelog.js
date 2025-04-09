@@ -1,10 +1,12 @@
-#!/usr/bin/env ts-node
+#!/usr/bin/env node
 
+// Using ES modules
 import { Octokit } from '@octokit/rest';
 import { OpenAI } from 'openai';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
-import { ChangelogEntry as FrontendChangelogEntry } from '../src/types'; // Import the frontend type
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 // Load environment variables
 dotenv.config();
@@ -29,7 +31,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-let version: string | null = null;
+let version = null;
 let commitCount = 10; // Default: fetch last 10 commits
 
 for (let i = 0; i < args.length; i++) {
@@ -45,32 +47,10 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-interface Commit {
-  sha: string;
-  date: string | null;
-  message: string;
-  body?: string; // Commit body might not always be separate
-  author_name: string | null;
-  author_email: string | null;
-}
-
-interface ChangelogOutput {
-  title: string;
-  description: string;
-  category: string;
-}
-
-// Define a more specific type for the data returned by Supabase insert+select
-// Acknowledge that Supabase client might return optional fields even if DB schema says NOT NULL
-type InsertedChangelogEntry = Omit<FrontendChangelogEntry, 'published_at'> & {
-  id: string;
-  published_at?: string; // Explicitly mark as potentially optional from client perspective
-};
-
 /**
  * Get commit history from GitHub API
  */
-async function getCommitHistory(owner: string, repo: string, count: number): Promise<Commit[]> {
+async function getCommitHistory(owner, repo, count) {
   try {
     console.log(`Fetching last ${count} commits from ${owner}/${repo}...`);
     const { data: commitsData } = await octokit.repos.listCommits({
@@ -96,7 +76,7 @@ async function getCommitHistory(owner: string, repo: string, count: number): Pro
 /**
  * Generate changelog using OpenAI
  */
-async function generateChangelog(commits: Commit[]): Promise<ChangelogOutput | null> {
+async function generateChangelog(commits) {
   if (commits.length === 0) {
     console.error('No commits fetched from GitHub');
     return null;
@@ -159,12 +139,12 @@ JSON output:
       const parsedJson = JSON.parse(content);
       // Basic validation of the expected structure
       if (parsedJson.title && parsedJson.description && parsedJson.category) {
-        return parsedJson as ChangelogOutput;
+        return parsedJson;
       } else {
         console.error('Parsed JSON from OpenAI is missing required fields (title, description, category):', parsedJson);
         return null;
       }
-    } catch (error: unknown) {
+    } catch (error) {
       console.error('Failed to parse OpenAI response as JSON:', content);
       console.error('Error details:', error);
       return null;
@@ -178,7 +158,7 @@ JSON output:
 /**
  * Save the changelog to the database
  */
-async function saveChangelog(changelog: ChangelogOutput, version: string | null): Promise<InsertedChangelogEntry | null> {
+async function saveChangelog(changelog, version) {
   try {
     const entryToInsert = {
       title: changelog.title,
@@ -192,7 +172,7 @@ async function saveChangelog(changelog: ChangelogOutput, version: string | null)
       .from('changelog_entries')
       .insert([entryToInsert])
       .select()
-      .single<InsertedChangelogEntry>(); // Use the refined type here
+      .single();
 
     if (error) {
       console.error('Error saving to Supabase:', error);
@@ -217,8 +197,7 @@ async function saveChangelog(changelog: ChangelogOutput, version: string | null)
  */
 async function main() {
   try {
-    // Use non-null assertion (!), we already checked these exist in the environment variable check
-    const commits = await getCommitHistory(repoOwner!, repoName!, commitCount);
+    const commits = await getCommitHistory(repoOwner, repoName, commitCount);
 
     if (commits.length === 0) {
       console.error(`No commits found in GitHub repo ${repoOwner}/${repoName}.`);
@@ -241,7 +220,7 @@ async function main() {
 
     if (savedEntry) {
       console.log('\nSuccessfully saved changelog entry to database!');
-      console.log(`ID: ${savedEntry.id}`);
+      console.log(`ID: ${savedEntry.id || 'N/A'}`);
       console.log(`Title: ${savedEntry.title}`);
       console.log(`Category: ${savedEntry.category}`);
       // Safely handle potentially undefined published_at

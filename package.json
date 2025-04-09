@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-changelog": "ts-node scripts/generate-changelog.ts"
+    "generate-changelog": "node scripts/generate-changelog.js"
   },
   "dependencies": {
     "@octokit/rest": "^21.1.1",
