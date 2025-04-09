@@ -8,12 +8,17 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [commitRange, setCommitRange] = useState('HEAD~10..HEAD');
+  const [commitCount, setCommitCount] = useState(10);
   const [version, setVersion] = useState('');
   const [generationOutput, setGenerationOutput] = useState<string | null>(null);
+  const [repoInfo, setRepoInfo] = useState<{ owner: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchChangelogs();
+    setRepoInfo({
+      owner: process.env.GITHUB_REPO_OWNER || 'your-owner', 
+      name: process.env.GITHUB_REPO_NAME || 'your-repo'
+    });
   }, []);
 
   async function fetchChangelogs() {
@@ -41,34 +46,21 @@ export function Dashboard() {
     setIsGenerating(true);
     setGenerationOutput('Generating changelog...');
     
-    try {
-      // In a real implementation, you'd call an API endpoint that would execute the script
-      // Here, we'll simulate the process
-      const cmd = `npm run generate-changelog -- --range "${commitRange}"${version ? ` --version "${version}"` : ''}`;
-      setGenerationOutput(`Executing: ${cmd}\n\nPlease run this command in your terminal to generate the changelog.`);
+    const cmd = `npm run generate-changelog -- --count ${commitCount}${version ? ` --version \"${version}\"` : ''}`;
+    
+    const instructions = `
+Please ensure your .env file contains:
+GITHUB_TOKEN=your_pat
+GITHUB_REPO_OWNER=${repoInfo?.owner || 'your-owner'}
+GITHUB_REPO_NAME=${repoInfo?.name || 'your-repo'}
 
-      // This would be replaced with an actual API call in production
-      // const response = await fetch('/api/generate-changelog', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ commitRange, version })
-      // });
-      
-      // if (!response.ok) {
-      //   throw new Error('Failed to generate changelog');
-      // }
-      
-      // const result = await response.json();
-      // setGenerationOutput(result.output);
-      
-      // Refresh changelogs
-      // await fetchChangelogs();
-    } catch (err) {
-      console.error('Error generating changelog:', err);
-      setGenerationOutput('Error generating changelog. See console for details.');
-    } finally {
-      setIsGenerating(false);
-    }
+Then, run this command in your terminal:
+
+${cmd}
+`;
+
+    setGenerationOutput(instructions);
+    setIsGenerating(false);
   }
 
   return (
@@ -84,22 +76,27 @@ export function Dashboard() {
         {/* Generator Panel */}
         <div className="md:col-span-1 bg-white shadow rounded-lg p-6 h-fit">
           <h2 className="text-xl font-semibold mb-4">Generate New Changelog</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Fetches commits from GitHub repo: 
+            <code className="text-xs bg-gray-100 p-1 rounded">{repoInfo?.owner}/{repoInfo?.name}</code>
+            (Configured in <code className="text-xs bg-gray-100 p-1 rounded">.env</code>)
+          </p>
           
           <div className="space-y-4">
             <div>
-              <label htmlFor="commitRange" className="block text-sm font-medium text-gray-700 mb-1">
-                Commit Range
+              <label htmlFor="commitCount" className="block text-sm font-medium text-gray-700 mb-1">
+                Number of Commits
               </label>
               <input
-                id="commitRange"
-                type="text"
+                id="commitCount"
+                type="number"
+                min="1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                value={commitRange}
-                onChange={(e) => setCommitRange(e.target.value)}
-                placeholder="e.g., HEAD~10..HEAD"
+                value={commitCount}
+                onChange={(e) => setCommitCount(Math.max(1, parseInt(e.target.value, 10) || 1))}
               />
               <p className="mt-1 text-xs text-gray-500">
-                Specify the range of commits to analyze
+                Number of recent commits to analyze from GitHub.
               </p>
             </div>
             
@@ -119,14 +116,14 @@ export function Dashboard() {
             
             <button
               onClick={generateChangelog}
-              disabled={isGenerating || !commitRange}
+              disabled={isGenerating}
               className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 focus:outline-none ${
-                isGenerating || !commitRange 
+                isGenerating
                   ? 'opacity-50 cursor-not-allowed' 
                   : 'hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
               }`}
             >
-              {isGenerating ? 'Generating...' : 'Generate Changelog'}
+              {isGenerating ? 'Generating Instructions...' : 'Show Generation Instructions'}
             </button>
           </div>
 

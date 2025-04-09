@@ -11,6 +11,7 @@
     "generate-changelog": "ts-node scripts/generate-changelog.ts"
   },
   "dependencies": {
+    "@octokit/rest": "^21.1.1",
     "@prisma/client": "^6.6.0",
     "@supabase/supabase-js": "^2.49.4",
     "date-fns": "^3.3.1",
@@ -20,8 +21,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-markdown": "^9.0.1",
-    "react-router-dom": "^6.22.2",
-    "simple-git": "^3.27.0"
+    "react-router-dom": "^6.22.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
