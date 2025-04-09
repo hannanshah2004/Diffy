@@ -44,10 +44,14 @@ A developer tool for automatically generating user-friendly changelogs from Git 
    # OpenAI API Key
    OPENAI_API_KEY=your_openai_api_key
    
-   # GitHub Configuration
+   # GitHub Configuration for backend script
    GITHUB_TOKEN=your_github_personal_access_token # Needs 'repo' scope
    GITHUB_REPO_OWNER=your_github_username_or_org
    GITHUB_REPO_NAME=your_github_repo_name
+   
+   # GitHub Configuration for frontend display
+   VITE_GITHUB_REPO_OWNER=your_github_username_or_org
+   VITE_GITHUB_REPO_NAME=your_github_repo_name
    ```
 
 4. Set up the database:

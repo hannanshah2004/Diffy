@@ -16,8 +16,8 @@ export function Dashboard() {
   useEffect(() => {
     fetchChangelogs();
     setRepoInfo({
-      owner: process.env.GITHUB_REPO_OWNER || 'your-owner', 
-      name: process.env.GITHUB_REPO_NAME || 'your-repo'
+      owner: import.meta.env.VITE_GITHUB_REPO_OWNER || 'your-owner', 
+      name: import.meta.env.VITE_GITHUB_REPO_NAME || 'your-repo'
     });
   }, []);
 
@@ -46,7 +46,7 @@ export function Dashboard() {
     setIsGenerating(true);
     setGenerationOutput('Generating changelog...');
     
-    const cmd = `npm run generate-changelog -- --count ${commitCount}${version ? ` --version \"${version}\"` : ''}`;
+    const cmd = `npm run generate-changelog -- --count ${commitCount}${version ? ` --version "${version}"` : ''}`;
     
     const instructions = `
 Please ensure your .env file contains:

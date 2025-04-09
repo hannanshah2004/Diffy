@@ -217,7 +217,8 @@ async function saveChangelog(changelog: ChangelogOutput, version: string | null)
  */
 async function main() {
   try {
-    const commits = await getCommitHistory(repoOwner, repoName, commitCount);
+    // Use non-null assertion (!), we already checked these exist in the environment variable check
+    const commits = await getCommitHistory(repoOwner!, repoName!, commitCount);
 
     if (commits.length === 0) {
       console.error(`No commits found in GitHub repo ${repoOwner}/${repoName}.`);
