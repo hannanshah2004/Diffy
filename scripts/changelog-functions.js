@@ -159,13 +159,27 @@ Here are the recent commits:
 
 ${commitText}
 
-Create a user-friendly changelog with the following:
-1. A concise title that summarizes the main changes.
-2. A brief description explaining the key updates in user-friendly terms (use Markdown).
-3. Categorize the change as one of: "New Feature", "Enhancement", "Bug Fix", "Breaking Change", "Performance", "Documentation", or "Other".
-4. Focus only on what would be relevant and meaningful to end-users.
-5. Ignore purely internal changes (e.g., chore, ci, refactor) or minor fixes that don't affect the user experience, unless they are significant.
-6. Format the output as compact JSON with fields: title, description, category.
+EXACT FORMAT REQUIRED:
+1. A title that summarizes the main changes. Title should be 5-10 words.
+2. One continuous paragraph description (NO BULLET POINTS) explaining the key updates in user-friendly terms.
+3. Categorize as: "New Feature", "Enhancement", "Bug Fix", "Breaking Change", "Performance", "Documentation", or "Other".
+
+STRICT FORMATTING RULES (FOLLOW EXACTLY):
+- NEVER use category labels like "New Feature:", "Enhancement:", etc. in the description.
+- NEVER use bullet points, numbered lists, or any kind of list in the description.
+- ALWAYS write the description as ONE CONTINUOUS PARAGRAPH.
+- NEVER separate the description into sections with headings or labels.
+- NEVER use line breaks within the description except for paragraph breaks.
+- The category should ONLY appear in the "category" field, not in the description.
+- The description should be 3-5 sentences, all in one paragraph.
+- DO NOT use any Markdown headings or subheadings in the description.
+
+Output should be EXACTLY in this JSON format:
+{
+  "title": "Concise title summarizing changes",
+  "description": "A single paragraph describing all changes without any bullet points, category labels, or formatting beyond basic text. This should read as a cohesive summary.",
+  "category": "Enhancement"
+}
 
 JSON output:
 `;
@@ -176,16 +190,16 @@ JSON output:
       messages: [
         {
           role: "system",
-          content: "You are a helpful assistant that creates professional software changelogs from GitHub commits."
+          content: "You are a changelog generator that produces consistent, well-formatted descriptions in exactly the format requested."
         },
         {
           role: "user",
           content: prompt
         }
       ],
-      temperature: 0.7,
-      max_tokens: 600, // Increased slightly for potentially longer descriptions
-      response_format: { type: "json_object" } // Request JSON output directly
+      temperature: 0.2, // Lower temperature for more deterministic output
+      max_tokens: 600,
+      response_format: { type: "json_object" }
     });
 
     const content = response.choices[0].message.content?.trim() || '';

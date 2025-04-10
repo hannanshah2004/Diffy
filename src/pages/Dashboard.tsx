@@ -213,10 +213,10 @@ Check the "Recent Changelogs" panel to see the generated entries.`);
                   placeholder="username"
                 />
               </div>
-              <div>
+          <div>
                 <label htmlFor="repo" className="block text-sm font-medium text-gray-700 mb-1">
                   Repository Name*
-                </label>
+            </label>
                 <input
                   id="repo"
                   name="repo"
@@ -362,9 +362,9 @@ Check the "Recent Changelogs" panel to see the generated entries.`);
                   ? 'Version label for the changelog entry.'
                   : 'Prefix for version labels in batch mode. Will generate entries like "prefix-batch-1", "prefix-batch-2", etc.'}
               </p>
-            </div>
-            
-            <button
+          </div>
+
+          <button
               onClick={generateChangelog}
               disabled={isGenerating || !credentials.token || !credentials.owner || !credentials.repo}
               className={`w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 focus:outline-none ${
@@ -374,14 +374,14 @@ Check the "Recent Changelogs" panel to see the generated entries.`);
               }`}
             >
               {isGenerating ? (
-                <>
-                  <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                  Generating...
-                </>
-              ) : (
-                'Generate Changelog'
-              )}
-            </button>
+              <>
+                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
+                Generating...
+              </>
+            ) : (
+              'Generate Changelog'
+            )}
+          </button>
           </div>
 
           {generationOutput && (
@@ -406,7 +406,7 @@ Check the "Recent Changelogs" panel to see the generated entries.`);
         <div className="md:col-span-2 bg-white shadow rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Recent Changelogs</h2>
-            <button
+              <button
               onClick={fetchChangelogs}
               disabled={loading}
               className={`inline-flex items-center px-3 py-1 border border-gray-300 text-sm leading-5 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
@@ -421,7 +421,7 @@ Check the "Recent Changelogs" panel to see the generated entries.`);
               ) : (
                 'Refresh'
               )}
-            </button>
+              </button>
           </div>
 
           {/* Loading state */}
