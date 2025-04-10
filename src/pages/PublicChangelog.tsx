@@ -141,18 +141,7 @@ export function PublicChangelog() {
 
       {/* Search and filters */}
       <div className="mt-8 mb-6">
-        <div className="flex flex-col gap-4">
-          {/* Search bar */}
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Search changelogs..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          
+        <div className="flex flex-col gap-4">          
           {/* Repository filters */}
           <div className="flex flex-col md:flex-row gap-4">
             {/* Repository owner dropdown */}
