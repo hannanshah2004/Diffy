@@ -13,7 +13,7 @@ export function Layout() {
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
                 <GitCommit className="h-8 w-8 text-indigo-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">Changelog Generator</span>
+                <span className="ml-2 text-xl font-bold text-gray-900">Diffy</span>
               </div>
               <div className="ml-6 flex space-x-8">
                 <Link
