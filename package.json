@@ -1,21 +1,33 @@
 {
   "name": "changelog-generator",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "generate-changelog": "node scripts/generate-changelog.js"
+    "server": "node server.js",
+    "server:dev": "nodemon server.js",
+    "start": "node server.js",
+    "build:frontend": "vite build",
+    "build:all": "npm run build:frontend",
+    "deploy:frontend": "npm run build:frontend && echo 'Deploy the dist folder to Netlify or Vercel'",
+    "postinstall": "echo 'Installation complete! Run npm run dev for frontend and npm run server for backend.'"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   },
   "dependencies": {
     "@octokit/rest": "^21.1.1",
     "@prisma/client": "^6.6.0",
     "@supabase/supabase-js": "^2.49.4",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
     "date-fns": "^3.3.1",
     "dotenv": "^16.4.7",
+    "express": "^5.1.0",
     "lucide-react": "^0.344.0",
     "openai": "^4.93.0",
     "react": "^18.3.1",

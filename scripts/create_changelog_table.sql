@@ -5,6 +5,9 @@ CREATE TABLE IF NOT EXISTS public.changelog_entries (
   description TEXT,
   category TEXT NOT NULL,
   version TEXT,
+  metadata JSONB,
+  repo_owner TEXT,
+  repo_name TEXT,
   published_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -29,4 +32,7 @@ CREATE POLICY "Allow update for authenticated users"
   FOR UPDATE TO authenticated USING (true);
 
 -- Add the table to the public API
-COMMENT ON TABLE public.changelog_entries IS 'Table containing changelog entries for the application'; 
+COMMENT ON TABLE public.changelog_entries IS 'Table containing changelog entries for the application';
+
+-- Create index on repository columns for faster filtering
+CREATE INDEX IF NOT EXISTS changelog_entries_repo_idx ON public.changelog_entries (repo_owner, repo_name); 

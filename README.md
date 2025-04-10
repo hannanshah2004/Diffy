@@ -1,16 +1,34 @@
 # AI-Powered Changelog Generator
 
-A developer tool for automatically generating user-friendly changelogs from Git commits using AI.
+A full-stack application for automatically generating user-friendly changelogs from Git commits using AI.
 
 ![Greptile](https://prod-files-secure.s3.us-west-2.amazonaws.com/bf6af4dc-1413-4e62-ab50-02b018be0bc3/2792fa11-8feb-44d5-93ca-05a49b18ac12/Greptile_(16).png)
 
 ## Features
 
 - **AI-Powered Changelog Generation:** Analyzes Git commits fetched from GitHub and generates user-friendly changelog entries.
-- **Developer Dashboard:** Interface for triggering changelog generation (shows instructions).
+- **GitHub Integration:** Fetches commits directly from any GitHub repository using user-provided credentials.
+- **Two Generation Modes:**
+  - **Recent Mode:** Generate from the most recent commits
+  - **Comprehensive History Mode:** Generate multiple changelog entries spanning the entire repository history
+- **User-friendly Dashboard:** Input GitHub credentials directly in the UI (no .env file needed).
 - **Public Changelog Page:** A clean, searchable, and filterable public-facing changelog website.
-- **Database Integration:** Stores and manages changelog entries with Supabase.
-- **GitHub Integration:** Fetches commits directly from a specified GitHub repository.
+- **Client-side Storage:** GitHub tokens are stored in the browser's localStorage for convenience.
+- **Separate Frontend/Backend:** Clean separation of concerns with API-based architecture.
+
+## Architecture Overview
+
+The application consists of two main components:
+
+1. **Frontend (React/TypeScript/Vite)**
+   - User interface for configuring and triggering changelog generation
+   - Public changelog display
+   - GitHub credential management
+
+2. **Backend (Express API)**
+   - Processes GitHub API requests
+   - Handles OpenAI integration
+   - Manages database operations
 
 ## Getting Started
 
@@ -19,7 +37,6 @@ A developer tool for automatically generating user-friendly changelogs from Git 
 - Node.js (v16+)
 - Supabase account
 - OpenAI API key
-- GitHub Personal Access Token (PAT) with `repo` scope.
 
 ### Installation
 
@@ -44,14 +61,8 @@ A developer tool for automatically generating user-friendly changelogs from Git 
    # OpenAI API Key
    OPENAI_API_KEY=your_openai_api_key
    
-   # GitHub Configuration for backend script
-   GITHUB_TOKEN=your_github_personal_access_token # Needs 'repo' scope
-   GITHUB_REPO_OWNER=your_github_username_or_org
-   GITHUB_REPO_NAME=your_github_repo_name
-   
-   # GitHub Configuration for frontend display
-   VITE_GITHUB_REPO_OWNER=your_github_username_or_org
-   VITE_GITHUB_REPO_NAME=your_github_repo_name
+   # Optional API URL override for production
+   # VITE_API_URL=https://your-backend-api-url.com/api
    ```
 
 4. Set up the database:
@@ -60,59 +71,108 @@ A developer tool for automatically generating user-friendly changelogs from Git 
    -- scripts/create_changelog_table.sql
    ```
 
-5. Start the development server:
-   ```
+## Development
+
+Run the frontend and backend separately during development:
+
+1. **Frontend:**
+   ```bash
    npm run dev
    ```
+   This will start the Vite development server at http://localhost:5173
+
+2. **Backend:**
+   ```bash
+   npm run server
+   ```
+   This will start the Express API server at http://localhost:3001
+
+## Deployment
+
+This application is designed to be deployed as two separate components:
+
+### Frontend Deployment (Netlify/Vercel/etc.)
+
+1. Build the frontend:
+   ```bash
+   npm run build:frontend
+   ```
+
+2. Deploy the `dist` directory to your preferred hosting service:
+   - Netlify: Connect your GitHub repository or drag and drop the `dist` folder
+   - Vercel: Connect your GitHub repository and set the build command to `npm run build:frontend`
+
+3. Set environment variables on your hosting provider:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_API_URL` (pointing to your deployed backend)
+
+### Backend Deployment (Render/Railway/etc.)
+
+1. Deploy to a Node.js hosting service:
+   - **Render.com**: Create a new Web Service, connect your GitHub repository, set the start command to `npm run start`
+   - **Railway.app**: Connect your GitHub repository, add environment variables
+   - **Heroku**: Deploy using the Heroku CLI or GitHub integration
+
+2. Set environment variables:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `OPENAI_API_KEY`
+   - `PORT` (optional, typically auto-set by the platform)
+
+3. Update your frontend's `VITE_API_URL` to point to your deployed backend URL.
 
 ## Usage
 
-### Generating Changelogs
+### User Flow
 
-You generate changelogs via the command line:
+1. **Access the Dashboard:**
+   - Navigate to the application in your browser
 
-1.  **Ensure Environment Variables are Set:** Make sure `GITHUB_TOKEN`, `GITHUB_REPO_OWNER`, and `GITHUB_REPO_NAME` are correctly set in your `.env` file.
-2.  **Run the Script:**
-    ```bash
-    # Generate from the last 10 commits (default)
-    npm run generate-changelog
-    
-    # Generate from the last 20 commits
-    npm run generate-changelog -- --count 20
-    
-    # Generate with a specific version tag
-    npm run generate-changelog -- --count 15 --version "v1.1.0"
-    ```
+2. **Enter GitHub Credentials:**
+   - Enter your GitHub Personal Access Token (with 'repo' scope)
+   - Specify the repository owner (username or organization)
+   - Specify the repository name
+   - These credentials are stored in your browser's localStorage for convenience
 
-The script will:
-   - Fetch the specified number of commits from the configured GitHub repository.
-   - Send the commit details to OpenAI for summarization.
-   - Save the generated changelog entry to your Supabase database.
+3. **Configure Generation Settings:**
+   - Choose between "Recent Commits" or "Full History" mode
+   - Set the number of commits or batch settings
+   - Optionally provide a version label
 
-### Viewing Changelogs
+4. **Generate Changelog:**
+   - Click the "Generate Changelog" button
+   - Wait for the generation process to complete
+   - View the results in the "Recent Changelogs" panel
 
-The public changelog page is available at `/changelog`. It offers:
-- Chronological display of changelog entries
-- Filtering by category
-- Search functionality
+5. **View Public Changelog:**
+   - Click "View" on any changelog entry to see the public-facing changelog page
+
+### Security Considerations
+
+- GitHub tokens are stored in the browser's localStorage and sent directly to your backend API
+- Tokens are never stored on the server (they're only used for the current request)
+- For enhanced security in production, consider:
+  - Implementing proper authentication for your application
+  - Using HTTPS for all API communications
+  - Setting appropriate CORS policies on your backend
 
 ## Technical Details
 
 ### Architecture
 
-- **Frontend:** React, TypeScript, Tailwind CSS
-- **Backend Script:** Node.js/TypeScript script for GitHub API interaction (via Octokit) and OpenAI integration.
+- **Frontend:** React, TypeScript, Tailwind CSS, Vite
+- **Backend:** Node.js/Express, GitHub API (Octokit), OpenAI API
 - **Database:** Supabase (PostgreSQL)
 - **AI:** OpenAI's API (gpt-4o model)
 
 ### Design Decisions
 
-- **GitHub API Integration:** Fetches commits directly from the source repository, removing the need for local git access during generation.
-- **Environment Configuration:** Sensitive keys (OpenAI, GitHub PAT) and repository details are managed via environment variables.
-- **Separation of Tools:** The changelog generator is separate from the public display, allowing developers to integrate it into their workflow.
-- **Markdown Support:** Descriptions are stored and rendered as Markdown for rich formatting.
-- **Categorization:** Each changelog entry is categorized for better organization and filtering.
-- **Responsive Design:** The public changelog is mobile-friendly.
+- **GitHub Token Handling:** User-provided through UI rather than environment variables for better UX
+- **API-Based Architecture:** Clean separation between frontend and backend for flexible deployment
+- **Comprehensive History Mode:** Provides a way to generate a complete project history through batched processing
+- **Batch Processing:** Handles large repositories by processing commits in manageable batches
+- **Responsive Design:** Mobile-friendly interface with accessible UI components
 
 ## License
 
