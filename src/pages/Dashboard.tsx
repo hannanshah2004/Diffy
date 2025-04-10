@@ -165,12 +165,6 @@ Check the "Recent Changelogs" panel to see the generated entries.`);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Changelog Generator</h1>
-        <p className="mt-2 text-gray-600">
-          Generate and manage changelogs for your project.
-        </p>
-      </div>
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Generator Panel */}
