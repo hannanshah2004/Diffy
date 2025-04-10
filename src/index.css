@@ -1,3 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f9fafb; /* A light gray background */
+}
+
+/* Define custom scrollbar styles for a more modern look */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d1d5db; /* gray-300 */
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af; /* gray-400 */
+}
+
+/* Base styles for prose content from ReactMarkdown */
+.prose {
+  color: #374151; /* gray-700 */
+}
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  color: #111827; /* gray-900 */
+}
+.prose a {
+  color: #4F46E5; /* primary indigo */
+  text-decoration: none;
+}
+.prose a:hover {
+  text-decoration: underline;
+}
+.prose code {
+    background-color: #e5e7eb; /* gray-200 */
+    padding: 0.2em 0.4em;
+    margin: 0;
+    font-size: 85%;
+    border-radius: 3px;
+    color: #1f2937; /* gray-800 */
+}
+.prose pre {
+    background-color: #f3f4f6; /* gray-100 */
+    border: 1px solid #e5e7eb; /* gray-200 */
+    border-radius: 6px;
+    padding: 1em;
+    overflow-x: auto;
+}
+.prose pre code {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: inherit;
+    border-radius: 0;
+    color: inherit;
+}
+.prose ul > li::before {
+    background-color: #6b7280; /* gray-500 */
+}
