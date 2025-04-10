@@ -10,6 +10,82 @@ export function PublicChangelog() {
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [repoOwners, setRepoOwners] = useState<string[]>([]);
+  const [repoNames, setRepoNames] = useState<string[]>([]);
+  const [selectedOwner, setSelectedOwner] = useState<string | null>(null);
+  const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
+
+  // Fetch all unique repo owners
+  useEffect(() => {
+    async function fetchRepoOwners() {
+      try {
+        const { data, error } = await supabase
+          .from('changelog_entries')
+          .select('repo_owner')
+          .not('repo_owner', 'is', null)
+          .order('repo_owner');
+        
+        if (error) throw error;
+        
+        // Extract unique repo owners
+        const uniqueOwners = Array.from(new Set(
+          data
+            .map(item => item.repo_owner)
+            .filter(Boolean) as string[]
+        ));
+        
+        setRepoOwners(uniqueOwners);
+        
+        // Always select the first owner if any exist
+        if (uniqueOwners.length > 0) {
+          setSelectedOwner(uniqueOwners[0]);
+        }
+      } catch (err) {
+        console.error('Error fetching repo owners:', err);
+      }
+    }
+    
+    fetchRepoOwners();
+  }, []);
+
+  // Fetch repos for selected owner
+  useEffect(() => {
+    async function fetchRepoNames() {
+      if (!selectedOwner) {
+        setRepoNames([]);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('changelog_entries')
+          .select('repo_name')
+          .eq('repo_owner', selectedOwner)
+          .not('repo_name', 'is', null)
+          .order('repo_name');
+        
+        if (error) throw error;
+        
+        // Extract unique repo names
+        const uniqueRepos = Array.from(new Set(
+          data
+            .map(item => item.repo_name)
+            .filter(Boolean) as string[]
+        ));
+        
+        setRepoNames(uniqueRepos);
+      } catch (err) {
+        console.error('Error fetching repo names:', err);
+      }
+    }
+    
+    fetchRepoNames();
+  }, [selectedOwner]);
+
+  // Reset selected repo when owner changes
+  useEffect(() => {
+    setSelectedRepo(null);
+  }, [selectedOwner]);
 
   useEffect(() => {
     async function fetchChangelogs() {
@@ -28,6 +104,14 @@ export function PublicChangelog() {
           query = query.or(`title.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
         }
 
+        if (selectedOwner) {
+          query = query.eq('repo_owner', selectedOwner);
+        }
+
+        if (selectedRepo) {
+          query = query.eq('repo_name', selectedRepo);
+        }
+
         const { data, error } = await query;
 
         if (error) {
@@ -44,10 +128,13 @@ export function PublicChangelog() {
     }
 
     fetchChangelogs();
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, selectedOwner, selectedRepo]);
 
   // Get unique categories for filter
   const categories = Array.from(new Set(changelogs.map(log => log.category)));
+
+  // Check if there's only one owner
+  const hasOnlyOneOwner = repoOwners.length === 1;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -60,7 +147,8 @@ export function PublicChangelog() {
 
       {/* Search and filters */}
       <div className="mt-8 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col gap-4">
+          {/* Search bar */}
           <div className="flex-1">
             <input
               type="text"
@@ -70,6 +158,53 @@ export function PublicChangelog() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+          
+          {/* Repository filters */}
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Repository owner dropdown */}
+            <div className="flex-1">
+              <label htmlFor="repo-owner" className="block text-sm font-medium text-gray-700 mb-1">
+                Repository Owner
+              </label>
+              <select
+                id="repo-owner"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                value={selectedOwner || ''}
+                onChange={(e) => setSelectedOwner(e.target.value || null)}
+                disabled={repoOwners.length <= 1}
+              >
+                {repoOwners.map(owner => (
+                  <option key={owner} value={owner}>
+                    {owner}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            {/* Repository name dropdown (shown if owner is selected or there's only one owner) */}
+            {(selectedOwner || hasOnlyOneOwner) && (
+              <div className="flex-1">
+                <label htmlFor="repo-name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Repository
+                </label>
+                <select
+                  id="repo-name"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  value={selectedRepo || ''}
+                  onChange={(e) => setSelectedRepo(e.target.value || null)}
+                >
+                  <option value="">All Repositories</option>
+                  {repoNames.map(repo => (
+                    <option key={repo} value={repo}>
+                      {repo}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+          
+          {/* Category filters */}
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setActiveFilter(null)}
@@ -107,7 +242,7 @@ export function PublicChangelog() {
       {/* Empty state */}
       {!loading && !error && changelogs.length === 0 && (
         <div className="text-center py-10 text-gray-500">
-          {searchQuery || activeFilter
+          {searchQuery || activeFilter || selectedOwner || selectedRepo
             ? 'No changelogs found matching your filters.'
             : 'No changelogs available yet.'}
         </div>
@@ -120,7 +255,7 @@ export function PublicChangelog() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">{log.title}</h2>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="mt-1 flex items-center gap-2 flex-wrap">
                   <span className="text-sm text-gray-500">
                     {format(parseISO(log.published_at), 'MMMM d, yyyy')}
                   </span>
@@ -130,6 +265,11 @@ export function PublicChangelog() {
                   {log.version && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                       v{log.version}
+                    </span>
+                  )}
+                  {log.repo_owner && log.repo_name && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      {log.repo_owner}/{log.repo_name}
                     </span>
                   )}
                 </div>
