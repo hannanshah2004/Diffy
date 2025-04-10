@@ -453,11 +453,7 @@ export function Dashboard() {
                                 ) : null}
                                 <div className="relative flex space-x-3 items-start">
                                     <div>
-                                        <span className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center ring-8 ring-white">
-                                            {/* Placeholder Icon - Could be dynamic based on category */}
-                                            <svg className="h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-                                            </svg>
+                                        <span className={`h-8 w-8 rounded-full ${getCategoryBadgeClasses(log.category)} flex items-center justify-center ring-8 ring-white`}>
                                         </span>
                                     </div>
                                     <div className="min-w-0 flex-1 pt-1.5">
@@ -468,14 +464,6 @@ export function Dashboard() {
                                                 </p>
                                                 <h3 className="text-lg font-semibold text-gray-900">{log.title}</h3>
                                             </div>
-                                            <a
-                                                href="/changelog" // Link to public view (consider linking to specific entry if possible)
-                                                className="text-sm font-medium text-indigo-600 hover:text-indigo-800 transition duration-150 ease-in-out flex-shrink-0 ml-4"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                View Public
-                                            </a>
                                         </div>
 
                                         <div className="mt-2 flex flex-wrap items-center gap-2">
