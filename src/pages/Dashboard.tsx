@@ -342,28 +342,6 @@ Check the "Recent Changelogs" panel to see the generated entries.`);
               </div>
             )}
             
-            {/* Version field - common to both modes */}
-            <div>
-              <label htmlFor="version" className="block text-sm font-medium text-gray-700 mb-1">
-                {generationMode === 'recent' 
-                  ? 'Version (Optional)'
-                  : 'Version Prefix (Optional)'}
-              </label>
-              <input
-                id="version"
-                type="text"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                value={version}
-                onChange={(e) => setVersion(e.target.value)}
-                placeholder={generationMode === 'recent' ? 'e.g., v1.0.0' : 'e.g., milestone-1'}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                {generationMode === 'recent'
-                  ? 'Version label for the changelog entry.'
-                  : 'Prefix for version labels in batch mode. Will generate entries like "prefix-batch-1", "prefix-batch-2", etc.'}
-              </p>
-          </div>
-
           <button
               onClick={generateChangelog}
               disabled={isGenerating || !credentials.token || !credentials.owner || !credentials.repo}
